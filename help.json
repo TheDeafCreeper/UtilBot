@@ -1,0 +1,8 @@
+{
+    "help": {
+        "cmd": "Help",
+        "desc": "Shows help info.",
+        "use": "help [page#/cmd]"
+    },
+    "announce": {}
+}
