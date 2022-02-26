@@ -1,0 +1,6 @@
+21:11:34 [DataBase: Info] Connected
+21:11:34 [UtilBot: Info] Connected
+21:11:34 [UtilBot: FatalError] ReferenceError: pre is not defined
+21:11:34 [UtilBot: FatalError] ReferenceError: pre is not defined
+21:11:34 [UtilBot: FatalError] ReferenceError: pre is not defined
+21:11:34 [UtilBot: FatalError] ReferenceError: pre is not defined

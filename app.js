@@ -1,6 +1,8 @@
 const r = require('rethinkdb');
 const Discord = require('discord.js')
-const bot = new Discord.Client();
+const bot = new Discord.Client()
+bot.login('NDE0MjMwNTQzMjI0Mjc0OTQ0.Dj1GaA.dMpr0QCrl0qqLekqgI2jJ7NgkyE');
+
 bot.on('warn', console.warn);
 bot.on('error', console.error);
 bot.on('disconnect', function (msg, code) {
@@ -53,53 +55,34 @@ bot.once('ready', () => {
             embed.setColor(0x4b4303)
             bot.user.setActivity(`@Utilbot | In ${bot.guilds.array().length} servers!`)
             if (message.guild == null) return;
-//server
+            //server
             let newserver = false
             r.table('Servers').get(message.guild.id).run(connection, function (err, server) {
                 if (server == null) {
                     newserver = true
-                    let serverr = {
-                        id: message.guild.id,
-                        lists: [],
-                        admins: [],
-                        announce: null,
-                        prefix: ',,',
-                        network: null,
-                        name: message.guild.name,
-                        ytlist: {
-                            playing: false,
-                            list: [],
-                            connection: null
+                    let server0 = {
+                        settings: {
+
                         },
-                        announcelevel: true,
-                        warncount: 10,
-                        enablewarnings: false,
-                        denyrepeat: false,
-                        deletemessages: true,
-                        messagetimeout: 8000,
-                        rules: [],
-                        ignorenext: false,
-                        echoadmin: true,
-                        warnings: [],
-                        commandlog: null,
-                        modlog: null,
-                        autoroles: [],
-                        muteroleid: 0,
-                        reportchannel: null
+                        network: {
+                            id: null,
+                            name: null,
+                            servers: [],
+                        }
                     }
-                    r.table('Servers').insert(serverr).run(connection)
+                    r.table('Servers').insert(server0).run(connection)
                     var pre = ',,'
                     return;
                 } else {
                     var pre = server.prefix
                 }
-                if (message.author.bot && message.author.id != 398285806713831424) return;
-//user
+                pre = '??'
+                if (message.author.bot && server.settings.ignorebot) return;
+                //user
                 r.table('Profiles').get(message.author.id).run(connection, function (err, result) {
                     if (result == null) {
                         let user = {
                             id: message.author.id,
-                            name: message.author.username,
                             lastsend: message.createdTimestamp,
                             level: 1,
                             xp: 0,
@@ -107,419 +90,165 @@ bot.once('ready', () => {
                             reason: 'AFK',
                             balance: 0,
                             color: 0x000000,
-                            mcname: 'Not Set',
-                            warnings: 0,
+                            ign: 'Not Set',
+                            triggers: 0,
                             lastmessage: '',
                             inventory: [],
                             recievelevelpm: true,
-                            profilepic: 'https://cdn.discordapp.com/attachments/403345572481990666/456508718809481217/download.png',
-                            currentmultiply: 1,
-                            boostexpire: 0,
-                            currentmultiplybal: 1,
-                            boostexpirebal: 0,
                             automodvio: []
                         }
                         r.table('Profiles').insert(user).run(connection)
                         return;
-                    } else {
                     }
-//verify integrity server
-                    if (server.id == undefined) {
-                        r.table('Servers').get(message.guild.id).update({ id: message.guild.id }).run(connection)
-                    }
-                    if (server.lists == undefined) {
-                        r.table('Servers').get(message.guild.id).update({ lists: [] }).run(connection)
-                    }
-                    if (server.admins == undefined) {
-                        r.table('Servers').get(message.guild.id).update({ admins: [] }).run(connection)
-                    }
-                    if (server.announce == undefined) {
-                        r.table('Servers').get(message.guild.id).update({ announce: null }).run(connection)
-                    }
-                    if (server.prefix == undefined) {
-                        r.table('Servers').get(message.guild.id).update({ prefix: ',,' }).run(connection)
-                    }
-                    if (server.network == undefined) {
-                        r.table('Servers').get(message.guild.id).update({ network: null }).run(connection)
-                    }
-                    if (server.name == undefined) {
-                        r.table('Servers').get(message.guild.id).update({ name: message.guild.name }).run(connection)
-                    }
-                    if (server.ytlist == undefined) {
-                        r.table('Servers').get(message.guild.id).update({
-                            ytlist: {
-                                playing: false,
-                                list: [],
-                                connection: null
-                            }
-                        }).run(connection)
-                    }
-                    if (server.announcelevel == undefined) {
-                        r.table('Servers').get(message.guild.id).update({ announcelevel: true }).run(connection)
-                    }
-                    if (server.warncount == undefined) {
-                        r.table('Servers').get(message.guild.id).update({ warncount: 10 }).run(connection)
-                    }
-                    if (server.enablewarnings == undefined) {
-                        r.table('Servers').get(message.guild.id).update({ enablewarnings: false }).run(connection)
-                    }
-                    if (server.denyrepeat == undefined) {
-                        r.table('Servers').get(message.guild.id).update({ denyrepeat: false }).run(connection)
-                    }
-                    if (server.joinmessage == undefined) {
-                        r.table('Servers').get(message.guild.id).update({ joinmessage: '' }).run(connection)
-                    }
-                    if (server.announcejoin == undefined) {
-                        r.table('Servers').get(message.guild.id).update({ announcejoin: false }).run(connection)
-                    }
-                    if (server.leavemessage == undefined) {
-                        r.table('Servers').get(message.guild.id).update({ leavemessage: '' }).run(connection)
-                    }
-                    if (server.announceleave == undefined) {
-                        r.table('Servers').get(message.guild.id).update({ announceleave: false }).run(connection)
-                    }
-                    if (server.announceban == undefined) {
-                        r.table('Servers').get(message.guild.id).update({ announceban: false }).run(connection)
-                    }
-                    if (server.banmessage == undefined) {
-                        r.table('Servers').get(message.guild.id).update({ banmessage: '' }).run(connection)
-                    }
-                    if (server.allowcommands == undefined) {
-                        r.table('Servers').get(message.guild.id).update({ allowcommands: true }).run(connection)
-                    }
-                    if (server.messagetimeout == undefined) {
-                        r.table('Servers').get(message.guild.id).update({ messagetimeout: 8000 }).run(connection)
-                    }
-                    if (server.deletemessages == undefined) {
-                        r.table('Servers').get(message.guild.id).update({ deletemessages: true }).run(connection)
-                    }
-                    if (server.rules == undefined) {
-                        r.table('Servers').get(message.guild.id).update({ rules: [] }).run(connection)
-                    }
-                    if (server.ignorenext == undefined) {
-                        r.table('Servers').get(message.guild.id).update({ ignorenext: false }).run(connection)
-                    }
-                    if (server.echoadmin == undefined) {
-                        r.table('Servers').get(message.guild.id).update({ echoadmin: true }).run(connection)
-                    }
-                    if (server.warnings == undefined) {
-                        r.table('Servers').get(message.guild.id).update({ warnings: [] }).run(connection)
-                    }
-                    if (server.commandlog == undefined) {
-                        r.table('Servers').get(message.guild.id).update({ commandlog: null }).run(connection)
-                    }
-                    if (server.modlog == undefined) {
-                        r.table('Servers').get(message.guild.id).update({ modlog: null }).run(connection)
-                    }
-                    if (server.autoroles == undefined) {
-                        r.table("Servers").get(message.guild.id).update({ autoroles: [] }).run(connection)
-                    }
-                    if (server.muteroleid == undefined) {
-                        r.table("Servers").get(message.guild.id).update({ muteroleid: 0 }).run(connection)
-                    }
-                    if (server.reportchannel == undefined) {
-                        r.table("Servers").get(message.guild.id).update({ reportchannel: null }).run(connection)
-                    }
-//verify integrity user
-                    if (result.id == undefined) {
-                        r.table("Profiles").get(message.author.id).update({ id: message.author.id }).run(connection)
-                    }
-                    if (result.name == undefined) {
-                        r.table("Profiles").get(message.author.id).update({ name: message.author.username }).run(connection)
-                    }
-                    if (result.lastsend == undefined) {
-                        r.table("Profiles").get(message.author.id).update({ lastsend: message.createdTimestamp }).run(connection)
-                    }
-                    if (result.level == undefined) {
-                        r.table("Profiles").get(message.author.id).update({ level: 1 }).run(connection)
-                    }
-                    if (result.xp == undefined) {
-                        r.table("Profiles").get(message.author.id).update({ xp: 0 }).run(connection)
-                    }
-                    if (result.afk == undefined) {
-                        r.table("Profiles").get(message.author.id).update({ afk: false }).run(connection)
-                    }
-                    if (result.reason == undefined) {
-                        r.table("Profiles").get(message.author.id).update({ reason: 'AFK' }).run(connection)
-                    }
-                    if (result.balance == undefined) {
-                        r.table("Profiles").get(message.author.id).update({ balance: 0 }).run(connection)
-                    }
-                    if (result.color == undefined) {
-                        r.table("Profiles").get(message.author.id).update({ color: 0x000000 }).run(connection)
-                    }
-                    if (result.mcname == undefined) {
-                        r.table("Profiles").get(message.author.id).update({ mcname: 'Not Set' }).run(connection)
-                    }
-                    if (result.warnings == undefined) {
-                        r.table("Profiles").get(message.author.id).update({ warnings: 0 }).run(connection)
-                    }
-                    if (result.lastmessage == undefined) {
-                        r.table("Profiles").get(message.author.id).update({ lastmessage: message.content }).run(connection)
-                    }
-                    if (result.inventory == undefined) {
-                        r.table("Profiles").get(message.author.id).update({ inventory: [] }).run(connection)
-                    }
-                    if (result.recievelevelpm == undefined) {
-                        r.table("Profiles").get(message.author.id).update({ recievelevelpm: true }).run(connection)
-                    }
-                    if (result.firstpm == undefined) {
-                        r.table("Profiles").get(message.author.id).update({ firstpm: true }).run(connection)
-                    }
-                    if (result.profilepic == undefined || result.profilepic == null) {
-                        r.table("Profiles").get(message.author.id).update({ profilepic: 'https://cdn.discordapp.com/attachments/403345572481990666/456508718809481217/download.png' }).run(connection)
-                    }
-                    if (result.currentmultiply == undefined) {
-                        r.table("Profiles").get(message.author.id).update({ currentmultiply: 1 }).run(connection)
-                    }
-                    if (result.boostexpire == undefined) {
-                        r.table("Profiles").get(message.author.id).update({ boostexpire: 0 }).run(connection)
-                    }
-                    if (result.currentmultiplybal == undefined) {
-                        r.table("Profiles").get(message.author.id).update({ currentmultiplybal: 1 }).run(connection)
-                    }
-                    if (result.boostexpirebal == undefined) {
-                        r.table("Profiles").get(message.author.id).update({ boostexpirebal: 0 }).run(connection)
-                    }
-                    if (result.automodvio == undefined) {
-                        r.table("Profiles").get(message.author.id).update({ automodvio: [] }).run(connection)
-                    }
-//warning
-                    if (!isadmin(message.author.id)) {
-                        if (server.warncount == undefined || server.warncount == null) {
-                            r.table('Servers').get(message.guild.id).update({ warncount: 10 }).run(connection)
-                        }
-                        if (server.enablewarnings && result.warnings == server.warncount && !isadmin(message.author.id)) {
-                            message.channel.send('Please reduce your chat footprint.').then(msg => {
-                                if (server.deletemessages) {
-                                    msg.delete(server.messagetimeout)
-                                }
-                            })
-                        }
-                        if (server.enablewarnings && result.warnings > server.warncount) {
-                            let admin = false
-                            for (let i = 0; i < server.admins.length; i++) {
-                                if (server.admins[i] == message.mentions.users.first().id) {
-                                    admin = true
-                                    break;
+                    automod()
+                    levels()
+                    manageafk()
+                    constantupdate()
+                    checkmentions()
+                    //handeler
+                    if (true) {
+                        if (server.ignorenext) { r.table('Servers').get(message.guild.id).update({ ignorenext: false }).run(connection); return; }
+                        if (!server.settings.enablecommands && !isadmin(message.author.id)) { send("Sorry, but commands are off here and you're not an admin!"); return; }
+                        let sender = message.author;
+                        let args = message.content.slice(pre.length).trim().split(" ");
+                        let cmd = args.shift().toLowerCase();
+                        if (message.content.startsWith(pre)) {
+                            try {
+                                let commandFile = require(`./commands.js`);
+                                commandFile.run(bot, message, args, r, connection, cmd, pre);
+                            } catch (err) {
+                                console.error(err);
+                            } finally {
+                                console.log(`${sender.username} ran the command: ${cmd} with arguments: ${args}`)
+                                if (server.settings.commandlogchannel != null) {
+                                    embed.setTitle(`${message.author.username} used a command!`)
+                                    embed.addField('Command:', cmd)
+                                    embed.addField('Arguments:', args.join(' ') + '.')
+                                    bot.channels.get(`${server.commandlog}`).send(embed).catch()
                                 }
                             }
-                            if (!isadmin(message.author.id)) {
-                                let reason = 'Spamming chat'
-                                message.author.send(`You were auto warned on ${message.guild.name} for ${reason}.`)
-                                r.table('Punishments').count().run(connection, function (err, count) {
-                                    r.table('Punishments').insert({ id: count, user: { name: message.author.username, id: message.author.id }, reason: reason, type: 'Warn' }).run(connection)
-                                    let serverwarnings = server.warnings
-                                    serverwarnings.push({ id: count, user: message.author.id })
-                                    r.table('Servers').get(message.guild.id).update({ warnings: serverwarnings }).run(connection)
-                                    try {
-                                        if (server.modlog != null) {
-                                            embed.setTitle(`Case ID: ${count}`)
-                                            embed.setDescription(`${message.author.username} was auto warned!`)
-                                            if (reason != undefined && reason != '') {
-                                                embed.addField('Reason:', reason)
-                                            }
-                                            embed.setColor(0xffa300)
-                                            bot.channels.get(server.modlog.id).send(embed)
-                                        }
-                                    } catch (error) { console.error(error) }
-                                    r.table('Profiles').get(message.author.id).run(connection, function(err, user) {
-                                        let found = false
-                                        let automodvios = user.automodvio
-                                        for (let i = 0; i < automodvios.length; i++) {
-                                            if (automodvios[i].guild == message.guild.id) {
-                                                found = true
-                                                let vios = automodvios[i].vios
-                                                let newvio = {
-                                                    case: count,
-                                                    number: automodvios.length,
-                                                    time: message.createdTimestamp
-                                                }
-                                                vios.push(newvio)
-                                                r.table('Profiles').get(message.author.id).update({ automodvio: automodvios }).run(connection)
-                                            }
-                                        }
-                                        if (!found) {
-                                            let vios = {
-                                                guild: message.guild.id,
-                                                vios: [{
-                                                    case: count,
-                                                    number: 0,
-                                                    time: message.createdTimestamp
-                                                }]
-                                            }
-                                            automodvios.push(vios)
-                                            r.table('Profiles').get(message.author.id).update({ automodvio: automodvios }).run(connection)
-                                        }
-                                    })
-                                })
-                            }
-                            if (server.denyrepeat && result.lastmessage.toLowerCase() == message.content.toLowerCase()) {
-                                message.delete(0)
-                                message.channel.send('Please dont repeat things.').then(msg => {
-                                    if (server.deletemessages) {
-                                        msg.delete(server.messagetimeout)
-                                    }
-                                })
-                                return;
-                            }
                         }
                     }
-//time check
-                    r.table('Profiles').get(message.author.id).run(connection, function (err, profile) {
-                        if (profile.boostexpire <= message.createdTimestamp) {
-                            r.table("Profiles").get(message.author.id).update({ boostexpire: 0 }).run(connection)
-                            r.table("Profiles").get(message.author.id).update({ currentmultiply: 1 }).run(connection)
+                    //---------
+                    function warn(user1, reason, user2) {
+                        let warnings = server.punishhistory[message.author.id]
+                        let layout = {
+                            time: Date.now(),
+                            punisheduser: {
+                                id: user1.id,
+                                name: user1.username,
+                            },
+                            reason: reason,
+                            punisher: {
+                                id: user2.id,
+                                name: user2.username,
+                            },
+                            caseid: generateID(),
+                            type: 'Warning'
                         }
-                        if (profile.boostexpirebal <= message.createdTimestamp) {
-                            r.table("Profiles").get(message.author.id).update({ boostexpirebal: 0 }).run(connection)
-                            r.table("Profiles").get(message.author.id).update({ currentmultiplybal: 1 }).run(connection)
+                        if (warnings == undefined) warnings = [];
+                        warnings.push(layout);
+                        r.table('Servers').get(message.guild.id).update({ punishhistory: server.punishhistory });
+                        bot.users.get(user1.id).send(`You were warned in **${message.guild.name}** for \`${reason}\` by **${user2.username}**.`);
+                        embed.setTitle(`${user1.username} was Warned.`)
+                        embed.addField(`Warned by`, user2.username, true)
+                        embed.addField('Reason for warning:', reason, true)
+                        embed.setFooter(`Case ID: ${layout.caseid}`)
+                        if (server.settings.modlogchannel !== null) bot.channels.get(server.settings.modlogchannel).send(embed);
+                    }
+                    function mute(user1, reason, user2) {
+                        let warnings = server.punishhistory[message.author.id]
+                        let layout = {
+                            time: Date.now(),
+                            punisheduser: {
+                                id: user1.id,
+                                name: user1.username,
+                            },
+                            reason: reason,
+                            punisher: {
+                                id: user2.id,
+                                name: user2.username,
+                            },
+                            caseid: generateID(),
+                            type: 'Mute'
                         }
-                    })
-//levels
-                    if (result.lastmessage != undefined) {
-                        if (message.createdTimestamp - result.lastsend >= 3000 && message.content != result.lastmessage && message.content.length != result.lastmessage.length) {
-                            r.table("Profiles").get(message.author.id).update({ xp: result.xp + (1 * result.currentmultiply) }).run(connection)
-                            r.table("Profiles").get(message.author.id).update({ balance: result.balance + 1 * result.currentmultiplybal }).run(connection)
-                        } else {
-                            let warn = result.warnings += 1
-                            r.table("Profiles").get(message.author.id).update({ warnings: warn }).run(connection)
-                        }
-                        if (message.createdTimestamp - result.lastsend >= 5000) {
-                            r.table("Profiles").get(message.author.id).update({ warnings: 0 }).run(connection)
-                        }
-                        if (result.xp >= result.level ** 2) {
-                            let level = result.level
-
-                            r.table("Profiles").get(message.author.id).update({ xp: 0 }).run(connection)
-                            r.table("Profiles").get(message.author.id).update({ level: level += 1 }).run(connection)
-                            r.table("Profiles").get(message.author.id).update({ balance: result.balance += 50 + (10 * Math.floor((result.level + 1) / 5)) }).run(connection)
-                            r.table('Servers').get(message.guild.id).run(connection, function (err, server) {
-                                if (server.announcelevel) {
-                                    message.channel.send(`Congrats ${message.author.username}, you leveled up to level ${result.level + 1} and recieved $${50 + (10 * Math.floor((result.level + 1) / 5))} for it!`).then(msg => {
-                                        if (server.deletemessages) {
-                                            msg.delete(server.messagetimeout)
-                                        }
-                                    })
-                                } else if (result.recievepm) {
-                                    message.author.send(`Congrats, you have leveled up to level ${result.level + 1}!
-                                                  \n       __***${result.level} >>> ${result.level + 1}***__`)
+                        if (warnings == undefined) warnings = [];
+                        warnings.push(layout);
+                        r.table('Servers').get(message.guild.id).update({ punishhistory: server.punishhistory });
+                        bot.users.get(user1.id).send(`You were muted in **${message.guild.name}** for \`${reason}\` by **${user2.username}**.`);
+                        embed.setTitle(`${user1.username} was Muted.`)
+                        embed.addField(`Muted by`, user2.username, true)
+                        embed.addField('Reason for mute:', reason, true)
+                        embed.setFooter(`Case ID: ${layout.caseid}`)
+                        if (server.settings.modlogchannel !== null) bot.channels.get(server.settings.modlogchannel).send(embed);
+                    }
+                    function automod() {
+                        if (!isspam()) return;
+                        r.table('Profiles').get(message.author.id).update({ triggers: result.triggers + 1 }).run(connection);
+                        if (isadmin(message.author.id) || !server.settings.automod) return;
+                        if (server.settings.sensetivity == undefined || server.settings.sensetivity == null) r.table('Servers').get(message.guild.id).update({ settings: { sensetivity: 10 } }).run(connection);
+                        if (result.triggers == server.settings.sensetivity) send('Please reduce your chat footprint', undefined, true);
+                        if (result.warnings == server.settings.sensetivity + 1) warn(message.author, 'Spam', { name: 'UtilBot Auto Moderation', id: bot.id });
+                        if (result.warnings == server.settings.sensetivity + 4) mute(message.author, 'Spam', { name: 'UtilBot Auto Moderation', id: bot.id });
+                        if (server.settings.detectrepeat && result.lastmessage.toLowerCase() == message.content.toLowerCase()) send('Please don\'t repeat things.', undefined, true);
+                    }
+                    function levels() {
+                        if (isspam()) return;
+                        if (result.lastmessage != undefined) {
+                            r.table("Profiles").get(message.author.id).update({ xp: result.xp + 1, balance: result.balance + 1 }).run(connection)
+                            if (result.xp >= result.level ** 2) {
+                                let level = result.level
+                                r.table("Profiles").get(message.author.id).update({
+                                    xp: 0, level: level += 1,
+                                    balance: result.balance += 50 + (10 * Math.floor((result.level + 1) / 10))
+                                }).run(connection)
+                                if (server.settings.announcelevelup) send(`Congrats ${message.author.username}, you leveled up to level ${result.level + 1} and recieved $${50 + (10 * Math.floor((result.level + 1) / 10))} for it!`, undefined, true)
+                                else if (result.recievepm) {
+                                    message.author.send(`Congrats ${message.author.username}, you leveled up to level ${result.level + 1} and recieved $${50 + (10 * Math.floor((result.level + 1) / 10))} for it!`)
                                     if (result.firstpm) {
                                         message.author.send(`As this is your first PM, you can disable this message by doing ${pre}recievepm in any server's chat. (I dont read DMs)`)
                                         r.table("Profiles").get(message.author.id).update({ firstpm: false }).run(connection)
                                     }
                                 }
-                            })
+                            }
                         }
                     }
-//remove afk
-                    if (!message.content.startsWith(`${pre}afk`)) {
-                        if (result.afk) {
-                            r.table('Profiles').get(message.author.id).update({ afk: false }).run(connection)
-                            r.table('Profiles').get(message.author.id).update({ reason: 'AFK' }).run(connection)
-                            message.channel.send(`Welcome back ${message.author.username}, I have removed your **AFK**!!`).then(msg => {
-                                if (server.deletemessages) {
-                                    msg.delete(server.messagetimeout)
-                                }
-                            })
-                            r.table('Counters').get("AFK Count").run(connection, function (err, count) {
-                                r.table('Counters').get("AFK Count").update({ count: count.count - 1 }).run(connection)
-                            })
-                        }
+                    function manageafk() {
+                        if (message.content.startsWith(`${pre}afk`) || !result.afk) return;
+                        r.table('Profiles').get(message.author.id).update({ afk: false }).run(connection)
+                        r.table('Profiles').get(message.author.id).update({ reason: 'AFK' }).run(connection)
+                        send(`Welcome back ${message.author.username}, I have removed your **AFK**!!`, undefined, true)
                     }
-//check mentions
-                    if (message.mentions.users.first() != undefined) {
-                        let mentions = message.mentions.users.array()
-                        let embed = new Discord.RichEmbed()
-                            .setTitle(`AFK users`)
-                        isafk = false
-                        for (let i = 0; i < mentions.length; i++) {
-                            r.table('Profiles').get(mentions[i].id).run(connection, function (err, afk) {
-                                if (afk != null) {
+                    function constantupdate() {
+                        r.table('Profiles').get(message.author.id).update({
+                            lastsend: message.createdTimestamp, name: message.author.username,
+                            lastmessage: message.content
+                        }).run(connection)
+                        r.table('Servers').get(message.guild.id).update({ name: message.guild.name }).run(connection)
+                    }
+                    function checkmentions() {
+                        if (message.mentions.users.first() != undefined) {
+                            let mentions = message.mentions.users.array()
+                            let embed = new Discord.RichEmbed()
+                                .setTitle(`AFK users`)
+                            let oneafk = false
+                            for (let i = 0; i < mentions.length; i++) {
+                                r.table('Profiles').get(mentions[i].id).run(connection, function (err, afk) {
+                                    if (afk == null) return;
                                     if (afk.afk) {
                                         embed.addField(`**${afk.name}** is **AFK**!`, `Reason: **${afk.reason}**`)
-                                        isafk = true
+                                        oneafk = true
                                     }
-                                }
-
-
-                                if (isafk && i == (mentions.length - 1)) {
-                                    message.channel.send(embed).then(msg => {
-                                        if (server.deletemessages) {
-                                            msg.delete(5000)
-                                        }
-                                    })
-                                }
-                            })
-                        }
-                        if (message.mentions.users.first().id == '414230543224274944') {
-                            embed.setTitle(`This server's prefix is ${pre}`)
-                            embed.setDescription(`To view the help command, do ${pre}help, and to view the bot's status do ${pre}status.`)
-                            message.channel.send(embed).then(msg => {
-                                if (server.deletemessages) {
-                                    msg.delete(server.messagetimeout)
-                                    message.delete(5000)
-                                }
-                            })
-                        }
-                    }
-//constant updates 
-                    r.table('Profiles').get(message.author.id).update({ lastsend: message.createdTimestamp }).run(connection)
-                    r.table('Profiles').get(message.author.id).update({ name: message.author.username }).run(connection)
-                    r.table('Profiles').get(message.author.id).update({ lastmessage: message.content }).run(connection)
-                    r.table('Servers').get(message.guild.id).update({ name: message.guild.name }).run(connection)
-
-//handeler
-                    if (!server.ignorenext) {
-                        let notadmin = true
-                        if (server.admins.length == 0) {
-                            notadmin = false
-                        } else {
-                            for (let i = 0; i < server.admins.length; i++) {
-                                if (server.admins[i] == message.author.id) {
-                                    notadmin = false
-                                    break;
-                                }
+                                })
+                            }
+                            if (oneafk) send(embed, 3000, true)
+                            if (message.content == `<@!${bot.id}>` || message.content == `<@${bot.id}>`) {
+                                embed.setTitle(`This server's prefix is ${pre}`)
+                                embed.setDescription(`To view the help command, do ${pre}help, and to view the bot's status do ${pre}status.`)
+                                send(embed, 5000, true)
                             }
                         }
-                        if (!server.allowcommands && notadmin) {
-                            message.channel.send("Sorry, but commands are off here and you're not an admin!").then(msg => {
-                                if (server.deletemessages) {
-                                    msg.delete(server.messagetimeout)
-                                    message.delete(5000)
-                                }
-                            })
-                        } else {
-                            let msg = message.content.toUpperCase();
-                            let sender = message.author;
-                            let args = message.content.slice(pre.length).trim().split(" ");
-                            let cmd = args.shift().toLowerCase();
-                            if (message.content.startsWith(pre + 'restart')) {
-                                let commandFile = require(`./commands.js`);
-                                commandFile.run(bot, message, args, r, connection, cmd, pre);
-                                console.error(err);
-                                console.log(`${sender.username} ran the command: ${cmd} with arguments: ${args}`)
-                            } else if (message.content.startsWith(pre)) {
-                                try {
-                                    let commandFile = require(`./commands.js`);
-                                    commandFile.run(bot, message, args, r, connection, cmd, pre);
-                                } catch (err) {
-                                    console.error(err);
-                                } finally {
-                                    console.log(`${sender.username} ran the command: ${cmd} with arguments: ${args}`)
-                                    if (server.commandlog != null) {
-                                        embed.setTitle(`${message.author.username} used a command!`)
-                                        embed.addField('Command:', cmd)
-                                        embed.addField('Arguments:', args.join(' ') + '.')
-                                        try{bot.channels.get(`${server.commandlog}`).send(embed)} catch (err) {}
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        r.table('Servers').get(message.guild.id).update({ ignorenext: false }).run(connection)
                     }
-//
                     function isadmin(user) {
                         if (message.guild.owner == user) {
                             return true
@@ -531,50 +260,147 @@ bot.once('ready', () => {
                         }
                         return false;
                     }
+                    function send(msg, delay, ignoresent) {
+                        message.channel.send(msg).then(msg2 => {
+                            if (server.settings.deletereplies) {
+                                if (!ignoresent) {
+                                    if (delay != undefined) {
+                                        msg2.delete(delay)
+                                        message.delete(delay)
+                                    } else {
+                                        msg2.delete(server.settings.msgdeletedealy)
+                                        message.delete(server.settings.msgdeletedealy)
+                                    }
+                                } else {
+                                    if (delay != undefined) {
+                                        msg2.delete(delay)
+                                    } else {
+                                        msg2.delete(server.settings.msgdeletedealy)
+                                    }
+                                }
+                            }
+                        })
+                    }
+                    function sendelse(msg, id, delay, ignoresent) {
+                        bot.channels.get(id).send(msg).then(msg2 => {
+                            if (server.settings.deletereplies) {
+                                if (!ignoresent) {
+                                    if (delay != undefined) {
+                                        msg2.delete(delay)
+                                        message.delete(delay)
+                                    } else {
+                                        msg2.delete(server.settings.msgdeletedealy)
+                                        message.delete(server.settings.msgdeletedealy)
+                                    }
+                                } else {
+                                    if (delay != undefined) {
+                                        msg2.delete(delay)
+                                    } else {
+                                        msg2.delete(server.settings.msgdeletedealy)
+                                    }
+                                }
+                            }
+                        }).catch()
+                    }
+                    function isspam() {
+                        let lastmessage = {
+                            content: result.lastmessage,
+                            sent: result.lastsend
+                        }
+                        if (message.createdTimestamp - lastmessage.sent > 5000) {
+                            r.table('Profiles').get(message.author.id).update({ triggers: 0 }).run(connection);
+                            return false;
+                        }
+                        let chars = {}
+                        if (lastmessage.content.toLowerCase() == message.content.toLowerCase() ||
+                            lastmessage.content.toLowerCase().startsWith(message.content.toLowerCase()) ||
+                            message.content.toLowerCase().startsWith(lastmessage.content.toLowerCase())) return true;
+                        if (message.content.length < 5) return true;
+                        for (let i = 0; i < message.content.length; i++) {
+                            if (chars[message.content[i].toLowerCase()] == undefined) chars[message.content[i].toLowerCase()] = 0
+                            chars[message.content[i].toLowerCase()]++
+                        }
+                        for (let char in chars) {
+                            if (chars[char] / message.content.length > .7) return true;
+                        }
+                        if (message.createdTimestamp - lastmessage.sent >= 2000) return true;
+                        return false;
+                    }
+                    function generateID() {
+                        let chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()-=_+'
+                        let id = []
+                        for (let i = 0; i < 16; i++) {
+                            id[i] = chars[Math.floor(Math.random * chars.length)]
+                        }
+                        id = id.join('')
+                        return id;
+                    }
+                    function parse(text, user) {
+                        text = text.trim().split(' ')
+                        for (let i = 0; i < text.length; i++) {
+                            if (text[i].trim().toLowerCase().startsWith('{user}')) {
+                                let temp = text[i].split('')
+                                temp.splice(0, 6)
+                                temp = temp.join('')
+                                text[i] = `${user.username}${temp}`
+                            } else if (text[i].trim().toLowerCase().endsWith('{user}')) {
+                                let temp = text[i].split('')
+                                temp.splice(text[i].length - 6, 6)
+                                temp = temp.join('')
+                                text[i] = `${temp}${user.username}`
+                            } else if (text[i].trim().toLowerCase().startsWith('{@user}')) {
+                                let temp = text[i].split('')
+                                temp.splice(0, 7)
+                                temp = temp.join('')
+                                text[i] = `<@!${user.id}>${temp}`
+                            } else if (text[i].trim().toLowerCase().endsWith('{user}')) {
+                                let temp = text[i].split('')
+                                temp.splice(text[i].length - 7, 7)
+                                temp = temp.join('')
+                                text[i] = `${temp}<@!${user.id}>`
+                            } else if (text[i].trim().toLowerCase().startsWith('{server}')) {
+                                let temp = text[i].split('')
+                                temp.splice(0, 8)
+                                temp = temp.join('')
+                                text[i] = `${message.guild.name}${temp}`
+                            } else if (text[i].trim().toLowerCase().endsWith('{server}')) {
+                                let temp = text[i].split('')
+                                temp.splice(text[i].length - 8, 8)
+                                temp = temp.join('')
+                                text[i] = `${temp}${message.guild.name}`
+                            }
+                        }
+                        text = text.join(' ')
+                        return text;
+                    }
                 })
             })
         })
     })
 
-//
+    //
     bot.on('guildMemberAdd', member => {
         r.table('Servers').get(member.guild.id).run(connection, function (err, server) {
-            if (server.announcejoin && server.joinmessage != undefined && bot.channels.get(server.announce) != undefined) {
-                let message = server.joinmessage
-                message = message.split(' ')
-                for (let i = 0; i < message.length; i++) {
-                    if (message[i] == '{user}') {
-                        message[i] = member.user.username
-                    } else if (message[i] == '{@user}') {
-                        message[i] = `<@!${member.user.id}>`
-                    } else if (message[i] == '{server}') {
-                        message[i] = member.guild.name
-                    }
+            if (server.settings.announcejoin && server.joinmessage != '' && bot.channels.get(server.settings.joinleavechannel) != undefined) {
+                let message = server.settings.joinmessage
+                parse(message, member)
+                for (let i = 0; i < server.autoroles.length; i++) {
+                    member.addRole(server.autoroles[i])
                 }
-                message = message.join(' ')
-                member.addRoles(server.autoroles)
-                bot.channels.get(server.announce).send(message)
+                bot.channels.get(server.settings.joinleavechannel).send(message)
             }
         })
     })
 
     bot.on('guildMemberRemove', member => {
         r.table('Servers').get(member.guild.id).run(connection, function (err, server) {
-            if (server.announceleave && server.leavemessage != undefined && bot.channels.get(server.announce) != undefined) {
-                let message = server.leavemessage
-                message = message.split(' ')
-                for (let i = 0; i < message.length; i++) {
-                    if (message[i] == '{user}') {
-                        message[i] = member.user.username
-                    } else if (message[i] == '{@user}') {
-                        message[i] = `<@!${member.user.id}>`
-                    } else if (message[i] == '{server}') {
-                        message[i] = member.guild.name
-                    }
+            if (server.settings.announceleave && server.leavemessage != '' && bot.channels.get(server.settings.joinleavechannel) != undefined) {
+                let message = server.settings.leavemessage
+                parse(message, member)
+                for (let i = 0; i < server.autoroles.length; i++) {
+                    member.addRole(server.autoroles[i])
                 }
-                message = message.join(' ')
-                member.user.send(message)
-                bot.channels.get(server.announce).send(message)
+                bot.channels.get(server.settings.joinleavechannel).send(message)
             }
         })
     })
@@ -582,21 +408,13 @@ bot.once('ready', () => {
     bot.on('guildBanAdd', function (guild, user) {
         r.table('Servers').get(guild.id).run(connection, function (err, server) {
             r.table('Networks').get(server.network).run(connection, function (err, network) {
-                if (server.announceban && server.banmessage != undefined && bot.channels.get(server.announce) != undefined) {
-                    let message = server.banmessage
-                    message = message.split(' ')
-                    for (let i = 0; i < message.length; i++) {
-                        if (message[i] == '{user}') {
-                            message[i] = user.username
-                        } else if (message[i] == '{@user}') {
-                            message[i] = `<@!${user.id}>`
-                        } else if (message[i] == '{server}') {
-                            message[i] = guild.name
-                        }
+                if (server.settings.announceban && server.banmessage != '' && bot.channels.get(server.settings.joinleavechannel) != undefined) {
+                    let message = server.settings.banmessage
+                    parse(message, member)
+                    for (let i = 0; i < server.autoroles.length; i++) {
+                        member.addRole(server.autoroles[i])
                     }
-                    message = message.join(' ')
-                    user.send(`You have been banned from ${guild.name}`)
-                    bot.channels.get(server.announce).send(message)
+                    bot.channels.get(server.settings.joinleavechannel).send(message)
                 }
                 if (network != null) {
                     for (let i = 0; i < network.servers.length; i++) {
@@ -610,7 +428,7 @@ bot.once('ready', () => {
             })
         })
     })
-    
+
     bot.on('channelDelete', channel => {
         r.table('Servers').get(channel.guild.id).run(connection, function (err, server) {
             if (channel.id == server.announce) {

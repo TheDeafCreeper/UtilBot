@@ -1,0 +1,55 @@
+{
+    "id": "guild.id",
+    "name": "guild.name",
+    "lists": {},
+    "admins": {},
+    "ignore": false,
+    "rules": [],
+    "autoroles": [],
+    "punishhistory": {},
+    "localprofs": {},
+    "settings": {
+        "announcements": {
+            "announcechannel": null,
+            "greetingchannel": null,
+            "farewellchannel": null,
+            "join": false,
+            "leave": false,
+            "ban": false,
+            "joinmsg": "Welcome /@user",
+            "leavemsg": "Farewell /user",
+            "banmsg": "/user was banned!"
+        },
+        "automod": {
+            "automod": true,
+            "antigrief": true,
+            "keyspam": true,
+            "repeats": false,
+            "sensetivity": 10,
+            "automutelength": 10,
+            "muteroleid": null
+        },
+        "msgs": {
+            "announcelevelup": true,
+            "deletereplies": true,
+            "msgdeletedealy": 8000,
+            "commandlogchannel": null,
+            "modlogchannel": null,
+            "reportchannel": null
+        },
+        "other": {
+            "prefix": ",,",
+            "ignorebot": true,
+            "enablecommands": true
+        },
+        "antigrief": {
+            "records": {},
+            "settings": {
+                "roledeletes": 4,
+                "channeldeletes": 4,
+                "kicks": 3,
+                "bans": 2
+            }
+        }
+    }
+}

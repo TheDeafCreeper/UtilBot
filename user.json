@@ -1,0 +1,18 @@
+{
+    "id": "author.id",
+    "name": "author.username",
+    "level": 0,
+    "xp": 0,
+    "balance": 0,
+    "afk": false,
+    "reason": "AFK",
+    "color": "0x000000",
+    "ing": {},
+    "triggers": {},
+    "lastmsg": {
+        "content": "",
+        "time": "Date.now()"
+    },
+    "inventory": [],
+    "leveluppm": true
+}

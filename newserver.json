@@ -1,0 +1,46 @@
+{
+    "title": null,
+    "ignorenext": false,
+    "id": null,
+    "moderation": {
+        "automod" : true,
+        "denyRepeat" : false,
+        "antigrief" : true,
+        "keyspam" : true
+    },
+    "settings": {
+        "announcechannel": null,
+        "joinleavechannel": null,
+        "prefix": ",,",
+        "announcelevelup": true,
+        "sensetivity": 10,
+        "automod": true,
+        "detectrepeat": true,
+        "deletereplies": true,
+        "msgdeletedealy": 8000,
+        "adminecho": true,
+        "commandlogchannel": null,
+        "modlogchannel": null,
+        "muteroleid": null,
+        "reportchannel": null,
+        "ignorebot": true,
+        "enablecommands": true,
+        "joinmessage": "",
+        "leavemessage": "",
+        "banmessage": "",
+        "announcejoin": false,
+        "announceleave": false,
+        "announceban": false
+    },
+    "network": {
+        "id": null,
+        "name": null,
+        "servers": [],
+        "mainserver": null
+    },
+    "lists": [],
+    "admins": [],
+    "punishments": [],
+    "autoroles": [],
+    "rules": []
+}
