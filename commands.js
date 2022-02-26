@@ -14,11 +14,24 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                     break;
                 }
             }
+            if (found) {
+                r.table('Counters').get(cmd).run(connection, function (err, count) {
+                    if (count == null) {
+                        r.table('Counters').insert({ id: cmd, Count: 1 }).run(connection)
+                    } else {
+                        r.table('Counters').get(cmd).update({ Count: count.Count + 1 }).run(connection)
+                    }
+                })
+                r.table('Counters').get("Commands Used").run(connection, function (err, count) {
+                    r.table('Counters').get("Commands Used").update({ count: count.count + 1 }).run(connection)
+                })
+                break;
+            }
         }
     }
     r.table('Servers').get(message.guild.id).run(connection, function (err, server) {
-        var commandfile = 3924
-        var mainfile = 491
+        var commandfile = 4318
+        var mainfile = 654
         const commands = [
             class help {
                 constructor() {
@@ -40,13 +53,12 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                             var page = args[0]
                         }
                         for (let i = 24 * (page - 1); i < commands.length && i < 24 * page; i++) {
-                            if (commands[i] == undefined) continue;
                             let command = new commands[i]()
                             if (!command.admin) {
-                                embed.addField(`__**${command.name.join(' | ')}**__`, command.desc, true)
+                                embed.addField(`__**${command.name.join(' | ')}**__`, command.desc)
                             } else {
                                 if (command.admin && isadmin(message.author.id)) {
-                                    embed.addField(`__**${command.name.join(' | ')}**__`, command.desc, true)
+                                    embed.addField(`__**${command.name.join(' | ')}**__`, command.desc)
                                 }
                             }
                         }
@@ -76,7 +88,12 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                             }
                         }
                         if (!found) {
-                            message.channel.send('I could not find a command under this name or alias')
+                            message.channel.send('I could not find a command under this name or alias').then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         } else {
                             message.channel.send(embed).then(msg => {
                                 if (server.deletemessages) {
@@ -100,10 +117,20 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                 run() {
                     if (isadmin(message.author.id)) {
                         if (args.length != 0) {
-                            message.channel.send(`Changed the prefix from ${pre} to ${args.join(' ')}`)
+                            message.channel.send(`Changed the prefix from ${pre} to ${args.join(' ')}`).then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                             r.table('Servers').get(message.guild.id).update({ prefix: args.join(' ') }).run(connection)
                         } else {
-                            message.channel.send('Please define a prefix!')
+                            message.channel.send('Please define a prefix!').then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         }
                     } else {
                         message.channel.send(`Nice try, but you are not an admin!`).then(msg => {
@@ -257,7 +284,12 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                     let islist = false
                     for (let i = 0; i < lists.length; i++) {
                         if (lists[i].name == name) {
-                            message.channel.send('This list already exists!')
+                            message.channel.send('This list already exists!').then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                             islist = true
                         }
                     }
@@ -277,7 +309,12 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                     let islist = false
                     for (let i = 0; i < lists.length; i++) {
                         if (lists[i].name == name) {
-                            message.channel.send(`Deleted the list **${name}**`)
+                            message.channel.send(`Deleted the list **${name}**`).then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                             lists.splice(i, 1)
                             islist = true
                             r.table('Servers').get(message.guild.id).update({ lists: lists }).run(connection)
@@ -676,7 +713,12 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                             }
                             embed.setTitle('Here is your new color!')
                             r.table('Profiles').get(message.author.id).update({ color: `0x${color}` }).run(connection)
-                            message.channel.send(embed)
+                            message.channel.send(embed).then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         } else {
                             message.channel.send('Select a color!')
                         }
@@ -799,6 +841,13 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                                 }
                             }
                         }
+                    } else {
+                        message.channel.send('This command is currently under maintinance!').then(msg => {
+                            if (server.deletemessages) {
+                                msg.delete(server.messagetimeout)
+                                message.delete(5000)
+                            }
+                        })
                     }
                 }
                 add() {
@@ -810,10 +859,20 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                     if (!alreadyadmin) {
                         if (message.mentions.users.first() != undefined) {
                             admins.push(message.mentions.users.first().id)
-                            message.channel.send(`Added **${message.mentions.users.first().username}** as admin.`)
+                            message.channel.send(`Added **${message.mentions.users.first().username}** as admin.`).then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                             r.table('Servers').get(message.guild.id).update({ admins: admins }).run(connection)
                         } else {
-                            message.channel.send('Please specify someone to add.')
+                            message.channel.send('Please specify someone to add.').then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         }
                     } else {
                         message.channel.send('This user is already an admin!').then(msg => {
@@ -943,18 +1002,33 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                                 stat = 'Nothing much going on'
                             }
                             let status = `${stat}`
-                            embed.setTitle(status + `\nMade by TheDeafCreeper#4727`)
-                            embed.setDescription(`Server prefix: **${pre}**`)
-                            embed.addField('Uptime:', time)
-                            embed.addField('Ping:', ping)
-                            embed.addField('Server count:', bot.guilds.array().length)
-                            embed.addField('Number of profiles:', number)
-                            embed.addField('Lines of code:', `${commandfile + mainfile}`)
-                            message.channel.send(embed).then(msg => {
-                                if (server.deletemessages) {
-                                    msg.delete(15000)
-                                    message.delete(5000)
-                                }
+                            r.table('Counters').orderBy(r.desc('Count')).run(connection, function (err, rawcmds) {
+                                rawcmds.toArray(function (err, cmds) {
+                                    let cmdsused = cmds.pop()
+                                    let afkcount = cmds.pop()
+                                    let commands = []
+                                    commands.push(`${cmds[0].id} (${cmds[0].Count} Uses)`)
+                                    commands.push(`${cmds[1].id} (${cmds[1].Count} Uses)`)
+                                    commands.push(`${cmds[2].id} (${cmds[2].Count} Uses)`)
+                                    commands.push(`${cmds[3].id} (${cmds[3].Count} Uses)`)
+                                    commands.push(`${cmds[4].id} (${cmds[4].Count} Uses)`)
+                                    embed.setTitle(status + `\nMade by TheDeafCreeper#4727`)
+                                    embed.setDescription(`Server prefix: **${pre}**`)
+                                    embed.addField('Uptime:', time)
+                                    embed.addField('Ping:', ping)
+                                    embed.addField('Server count:', bot.guilds.array().length)
+                                    embed.addField('Number of profiles:', number)
+                                    embed.addField('Lines of code:', `${commandfile + mainfile}`)
+                                    embed.addField('Number of AFK Users: ', afkcount.count + '\n__The Following fields are as of 7/20/18__')
+                                    embed.addField('Total # of cmds used: ', cmdsused.count)
+                                    embed.addField('Top 5 commands: ', commands.join('\n'))
+                                    message.channel.send(embed).then(msg => {
+                                        if (server.deletemessages) {
+                                            msg.delete(15000)
+                                            message.delete(5000)
+                                        }
+                                    })
+                                })
                             })
                         });
                     } else {
@@ -1023,9 +1097,19 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                 run() {
                     if (this.online) {
                         if (isNaN(args[0])) {
-                            message.channel.send(`**${args[0]}** is not a number`)
+                            message.channel.send(`**${args[0]}** is not a number`).then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         } else {
-                            message.channel.send(`**${args[0]}** is a number`)
+                            message.channel.send(`**${args[0]}** is a number`).then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         }
                     } else {
                         message.channel.send('This command is currently under maintenance!').then(msg => {
@@ -1099,7 +1183,12 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                             }
                             purge()
                         } else {
-                            message.channel.send('Nice try, but you are not an admin!')
+                            message.channel.send('Nice try, but you are not an admin!').then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         }
                     } else {
                         message.channel.send('This command is currently under maintenance!').then(msg => {
@@ -1140,7 +1229,12 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                             }
                         }
                         if (!found) {
-                            message.channel.send(`That is not a viable option, please chose one of the following:\n${choices.join(', ')}`)
+                            message.channel.send(`That is not a viable option, please chose one of the following:\n${choices.join(', ')}`).then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         }
                         if (isadmin(message.author.id)) {
                             if (server.network == null || run == undefined) {
@@ -1152,13 +1246,20 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                                         }
                                     })
                                 } else {
-                                    this[run]()
+                                    let networkcmd = new commands[14]()
+                                    networkcmd[run]()
                                 }
                             } else {
-                                this[run]()
+                                let networkcmd = new commands[14]()
+                                networkcmd[run]()
                             }
                         } else {
-                            message.channel.send('Nice try, but you are not an admin!')
+                            message.channel.send('Nice try, but you are not an admin!').then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         }
                     } else {
                         message.channel.send('This command is currently under maintenance!').then(msg => {
@@ -1245,7 +1346,12 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                                 }
                             })
                         } else {
-                            message.channel.send('Please put a server id!')
+                            message.channel.send('Please put a server id!').then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         }
 
                     })
@@ -1310,7 +1416,12 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                             }
 
                         } else {
-                            message.channel.send('This server is not in a network!')
+                            message.channel.send('This server is not in a network!').then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         }
                     })
                 }
@@ -1338,7 +1449,12 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                                 })
                             }
                         } else {
-                            message.channel.send('This server is not in a network!')
+                            message.channel.send('This server is not in a network!').then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         }
                     })
                 }
@@ -1358,7 +1474,12 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
 
                             })
                         } else {
-                            message.channel.send('This server is not in a network!')
+                            message.channel.send('This server is not in a network!').then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         }
                     })
                 }
@@ -1396,7 +1517,12 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                                 })
                             }
                         } else {
-                            message.channel.send('This user is already an admin!')
+                            message.channel.send('This user is already an admin!').then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         }
                     })
                 }
@@ -1437,16 +1563,26 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                     this.online = true
                     this.admin = true
                 }
-                async run() {
+                run() {
                     let restarters = ['213396745231532032', '360253852936830988', '259847539619135488']
-                    if (restarters.indexOf(message.author.id) == -1) message.channel.send('You do not have permission to do this!')
-                    await message.channel.send('Restarting...')
-                    process.exit();
+                    if (this.online) {
+                        if (restarters.indexOf(message.author.id) != -1) {
+                            let bob = undefined
+                            bob = bob.length
+                        } else {
+                            message.channel.send('You do not have permission to do this!').then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
+                        }
+                    }
                 }
             },
             class setannouncement {
                 constructor() {
-                    this.name = ['Setannouncement', 'setannounce', 'announcechannel']
+                    this.name = ['Setannouncement', 'setannounce']
                     this.desc = `**ADMIN COMMAND** Sets the Announcement channel`
                     this.use = `${pre}setannouncement <#channel>`
                     this.example = `${pre}setannouncement #general`
@@ -1661,7 +1797,12 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                             user = args.join(' ')
                             name = true
                         } else {
-                            message.channel.send('Please either mention a user or put an in-game name!')
+                            message.channel.send('Please either mention a user or put an in-game name!').then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         }
                         if (name) {
                             if (message.mentions.users.first()) {
@@ -1823,10 +1964,20 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                     if (isadmin(message.author.id)) {
                         if (server.announcelevel) {
                             r.table('Servers').get(message.guild.id).update({ announcelevel: false }).run(connection)
-                            message.channel.send('Level up announcements are now **off**.')
+                            message.channel.send('Level up announcements are now **off**.').then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         } else {
                             r.table('Servers').get(message.guild.id).update({ announcelevel: true }).run(connection)
-                            message.channel.send('Level up announcements are now **on**.')
+                            message.channel.send('Level up announcements are now **on**.').then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         }
                     } else {
                         message.channel.send('You are not an admin!').then(msg => {
@@ -1851,9 +2002,19 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                     if (isadmin(message.author.id)) {
                         if (!isNaN(args[0])) {
                             r.table('Servers').get(message.guild.id).update({ warncount: args[0] }).run(connection)
-                            message.channel.send(`Set the warn count to ${args[0]}`)
+                            message.channel.send(`Set the warn count to ${args[0]}`).then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         } else {
-                            message.channel.send('Please put in a number for the number of warnings!')
+                            message.channel.send('Please put in a number for the number of warnings!').then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         }
                     } else {
                         message.channel.send('Nice try, but you\'re not an admin!').then(msg => {
@@ -1878,10 +2039,20 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                     if (isadmin(message.author.id)) {
                         if (server.enablewarnings) {
                             r.table('Servers').get(message.guild.id).update({ enablewarnings: false }).run(connection)
-                            message.channel.send('I will no longer warn spamers.')
+                            message.channel.send('I will no longer warn spamers.').then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         } else {
                             r.table('Servers').get(message.guild.id).update({ enablewarnings: true }).run(connection)
-                            message.channel.send('I am now warning spammers.')
+                            message.channel.send('I am now warning spammers.').then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         }
                     } else {
                         message.channel.send('Nice try, but you\'re not an admin!').then(msg => {
@@ -1911,7 +2082,12 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                             page = args[0]
                         }
                         if (user.inventory == undefined || user.inventory.length == 0) {
-                            message.channel.send('Your inventory is empty!')
+                            message.channel.send('Your inventory is empty!').then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                             r.table('Profiles').get(message.author.id).update({ inventory: [] }).run(connection)
                         } else {
                             for (let i = 12 * (page - 1); i < user.inventory.length && i < 12 * page; i++) {
@@ -1943,10 +2119,20 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                     r.table('Profiles').get(message.author.id).run(connection, function (err, profile) {
                         if (profile.recievelevelpm) {
                             r.table('Profiles').get(message.author.id).update({ recievelevelpm: false }).run(connection)
-                            message.channel.send('You will no longer recieve level up PMs.')
+                            message.channel.send('You will no longer recieve level up PMs.').then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         } else {
                             r.table('Profiles').get(message.author.id).update({ recievelevelpm: false }).run(connection)
-                            message.channel.send('You will now receive level up PMs.')
+                            message.channel.send('You will now receive level up PMs.').then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         }
                     })
                 }
@@ -2299,9 +2485,19 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                         })
                     } else {
                         if (message.mentions.users.first().id == message.author.id) {
-                            message.channel.send('You can not ban yourself!')
+                            message.channel.send('You can not ban yourself!').then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         } else if (isadmin(message.mentions.users.first().id)) {
-                            message.channel.send('I cannot ban admins!')
+                            message.channel.send('I cannot ban admins!').then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         } else {
                             try {
                                 let user = message.mentions.users.first()
@@ -2356,9 +2552,19 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                         })
                     } else {
                         if (message.mentions.users.first().id == message.author.id) {
-                            message.channel.send('You can not kick yourself!')
+                            message.channel.send('You can not kick yourself!').then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         } else if (isadmin(message.mentions.users.first().id)) {
-                            message.channel.send('I cannot kick admins!')
+                            message.channel.send('I cannot kick admins!').then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         } else {
                             try {
                                 let user = message.mentions.users.first()
@@ -2411,9 +2617,19 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                             for (let i = 1; i < level; i++) {
                                 xp += i ** 2
                             }
-                            message.channel.send(`Total : ${xp} | For level ${level} : ${level ** 2}`)
+                            message.channel.send(`Total : ${xp} | For level ${level} : ${level ** 2}`).then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         } else {
-                            message.channel.send(`For level ${level} : ${(level - 1) ** 2}`)
+                            message.channel.send(`For level ${level} : ${(level - 1) ** 2}`).then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         }
                     } else {
                         message.channel.send('Please put a level down!').then(msg => {
@@ -2497,7 +2713,12 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                     if (isadmin(message.author.id)) {
                         if (args[0] != undefined && !isNaN(args[0])) {
                             r.table("Servers").get(message.guild.id).update({ messagetimeout: args[0] * 1000 }).run(connection)
-                            message.channel.send(`The reply deletion delay is now ${args[0]} seconds.`)
+                            message.channel.send(`The reply deletion delay is now ${args[0]} seconds.`).then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         }
                     } else {
                         message.channel.send('Nice try, but you are not an admin!').then(msg => {
@@ -2522,11 +2743,10 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                 run() {
                     let shop = server.shop, page = 1
                     if (shop == undefined) shop = []
-                    if (!isNaN(args[0]) || args[0] == undefined) page = 0;
+                    if (!isNaN(args[0]) || args[0] == undefined) page = 1;
                     else page = args[0] - 1;
                     for (let i = page * 21; i < 21 + (page * 21) && i < shop.length; i++) {
                         let item = shop[i];
-                        if (item.stock < 0) item.stock = 'Infinite'
                         embed.addField(`${item.name}`, `Price: ${item.price}\nStock: ${item.stock}`, true);
                     }
                     embed.setTitle(`${message.guild.name}'s Shop`)
@@ -2550,34 +2770,26 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                 }
                 run() {
                     r.table('Profiles').get(message.author.id).run(connection, function (err, profile) {
-                        let shop = server.shop, item
-                        let amount;
-                        if (isNaN(args[args.length -1])) amount = 1;
-                        else amount = args.pop();
-                        if (profile == null) { message.channel.send('Something went wrong! Dont take it personally, probally just me.'); return; }
-                        let name = args.join(' ').toLowerCase(), x = false, inventory = profile.inventory, y = false;
-                        if (shop == undefined) shop = []
+                        let shop = server.shop, item, amount = args.pop();
+                        if (profile == null) {message.channel.send('Something went wrong! Dont take it personally, probally just me.'); return;}
+                        let name = args.join(' ').toLowerCase(), x = false, inventory = profile.inventory, y = true;
                         for (let i = 0; i < shop.length; i++) {
                             if (shop[i].name.toLowerCase() != name) continue;
                             x = true; item = shop[i];
-                            if (isNaN(amount)) { message.channel.send('Invalid number for amount!'); return; }
-                            if (profile.balance < item.price * amount) { message.channel.send('Insufficient balance!'); return; }
-                            if ((item.stock == 0 || amount > item.stock) && item.stock >= 0) { message.channel.send('There\'s not enough of this item to buy!'); return; }
+                            if (profile.balance < item.price) {message.channel.send('Insufficient balance!'); return;}
+                            if (isNaN(amount)) {message.channel.send('Invalid number for amount!'); return;}
+                            if (item.stock == 0 || amount > item.stock) {message.channel.send('There\'s not enough of this item to buy!'); return;}
                             if (inventory == undefined) inventory = []
-                            if (item.stock > 0) item.stock -= amount
-                            profile.balance -= item.price * amount
-                            for (let l = 0; l < profile.inventory.length; l++)
-                                if (profile.inventory[l].name == item.name && profile.inventory[l].serverid == message.guild.id) { let num = (profile.inventory[l].count * 1); num += amount * 1; profile.inventory[l].count = num; y = true; break; }
+                            item.stock -= amount
+                            for (let l = 0; l < profile.inventory.length; l++) 
+                                if (profile.inventory[l].name == item.name) {profile.inventory[l].amount += amount; y = true; break;}
                             if (!y)
-                                profile.inventory.push({ name: item.name, count: amount, serverid: message.guild.id })
-                            message.channel.send(`You've succesfully bought ${amount} ${item.name} for ${item.price * amount}`)
-                            if (server.orders == undefined) server.orders = []
-                            server.orders.push({ user: message.author.username, item: item.name, amount: amount })
+                                profile.inventory.push({name: item.name, count: amount})
                             r.table('Servers').get(message.guild.id).update(server).run(connection)
                             r.table('Profiles').get(message.author.id).update(profile).run(connection)
                             break;
                         }
-                        if (!x) { message.channel.send('I could not find an item with this name; did you spell it correctly?'); return; }
+                        if (!x) {message.channel.send('I could not find an item with this name; did you spell it correctly?'); return;}
                     })
                 }
             },
@@ -2591,13 +2803,8 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                     this.admin = false
                 }
                 run() {
-                    message.channel.startTyping(300)
+                    bot.channel.startTyping()
                     r.table('Profiles').orderBy(r.desc('balance')).limit(10).run(connection, function (err, profilesraw) {
-                        if (err) {
-                            console.error(err);
-                            message.channel.send('An error occured');
-                            return;
-                        }
                         profilesraw.toArray(function (err, profiles) {
                             embed.setTitle('Top 10 richest users.')
                             for (let i = 0; i < profiles.length; i++) {
@@ -2611,7 +2818,7 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                             })
                         })
                     })
-                    message.channel.stopTyping(true)
+                    bot.channel.stopTyping(true)
                 }
             },
             class toplevel {
@@ -2623,15 +2830,9 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                     this.online = true
                     this.admin = false
                 }
-
                 run() {
-                    message.channel.startTyping(30000)
+                    bot.channel.startTyping()
                     r.table('Profiles').orderBy(r.desc('level')).limit(10).run(connection, function (err, profilesraw) {
-                        if (err) {
-                            console.error(err);
-                            message.channel.send('An error occured');
-                            return;
-                        }
                         profilesraw.toArray(function (err, profiles) {
                             embed.setTitle('Top 10 highest level users.')
                             for (let i = 0; i < profiles.length; i++) {
@@ -2645,7 +2846,7 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                             })
                         })
                     })
-                    message.channel.stopTyping(true)
+                    bot.channel.stopTyping(true)
                 }
             },
             class additem {
@@ -2658,25 +2859,24 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                     this.admin = true
                 }
                 run() {
-                    if (!isadmin(message.author.id)) { message.channel.send('You dont have permission to run this command!'); return; }
                     if (server.shop == undefined) server.shop = []
                     let shop = server.shop, item, amount = args.pop();
                     let price = args.pop();
-                    let name = args.join(' '), x = false;
+                    let name = args.join(' ').toLowerCase(), x = false;
                     for (let i = 0; i < shop.length; i++) {
-                        if (shop[i].name.toLowerCase() == name.toLowerCase()) { message.channel.send('This item already exists! If you would like to edit it use edititem.'); x = true; break; }
+                        if (shop[i].name.toLowerCase() == name) {message.channel.send('This item already exists! If you would like to edit it use edititem.'); return;}
+                        x = true; item = shop[i];
+                        if (isNaN(amount)) {message.channel.send('Invalid number for amount!'); return;}
+                        if (isNaN(price)) {message.channel.send('Invalid number for price!'); return;}
+                        item.stock = amount
+                        item.price = price
+                        item.name = name
+                        shop.push(item)
+                        r.table('Servers').get(message.guild.id).update(server).run(connection)
+                        message.channel.send(`Added ${item.name} to with ${item.stock} @ $${item.price} each.`)
+                        break;
                     }
-                    if (x) return;
-                    item = {}
-                    if (isNaN(amount)) { message.channel.send('Invalid number for amount!'); return; }
-                    if (isNaN(price)) { message.channel.send('Invalid number for price!'); return; }
-                    if (name == '' || name == undefined) { message.channel.send('Invalid name!'); return; }
-                    item.stock = amount
-                    item.price = price
-                    item.name = name
-                    shop.push(item)
-                    r.table('Servers').get(message.guild.id).update(server).run(connection)
-                    message.channel.send(`Added ${item.name} to with ${item.stock} @ $${item.price} each.`)
+                    if (!x) {message.channel.send('I could not find an item with this name; did you spell it correctly?'); return;}
                 }
             },
             class removeitem {
@@ -2689,16 +2889,14 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                     this.admin = true
                 }
                 run() {
-                    if (!isadmin(message.author.id)) { message.channel.send('You dont have permission to run this command!'); return; }
                     let shop = server.shop, item, name = args.join(' '), x = false;
                     for (let i = 0; i < shop.length; i++) {
-                        if (shop[i].name.toLowerCase() != name.toLowerCase()) continue;
-                        message.channel.send(`Removed ${shop[i].name}.`)
+                        if (shop[i].name.toLowerCase() != name) continue;
                         x = true; shop.splice(i, 1);
                         r.table('Servers').get(message.guild.id).update(server).run(connection)
                         break;
                     }
-                    if (!x) { message.channel.send('I could not find an item with this name; did you spell it correctly?'); return; }
+                    if (!x) {message.channel.send('I could not find an item with this name; did you spell it correctly?'); return;}
                 }
             },
             class edititem {
@@ -2711,76 +2909,22 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                     this.admin = true
                 }
                 run() {
-                    if (!isadmin(message.author.id)) { message.channel.send('You dont have permission to run this command!'); return; }
                     if (server.shop == undefined) server.shop = []
                     let shop = server.shop, item, amount = args.pop();
                     let price = args.pop();
                     let name = args.join(' ').toLowerCase(), x = false;
                     for (let i = 0; i < shop.length; i++) {
-                        if (shop[i].name.toLowerCase() != name) { continue; }
+                        if (shop[i].name.toLowerCase() != name) {continue;}
                         x = true; item = shop[i];
-                        if (isNaN(amount)) { message.channel.send('Invalid number for amount!'); return; }
-                        if (isNaN(price)) { message.channel.send('Invalid number for price!'); return; }
+                        if (isNaN(amount)) {message.channel.send('Invalid number for amount!'); return;}
+                        if (isNaN(price)) {message.channel.send('Invalid number for price!'); return;}
                         item.stock = amount
                         item.price = price
                         r.table('Servers').get(message.guild.id).update(server).run(connection)
                         message.channel.send(`Updated ${item.name} to a stock of ${item.stock} @ $${item.price} each.`)
                         break;
                     }
-                    if (!x) { message.channel.send('I could not find an item with this name; did you spell it correctly?'); return; }
-                }
-            },
-            class orders {
-                constructor() {
-                    this.name = ['orders']
-                    this.desc = `Shows all purchased items.`
-                    this.use = `${pre}orders [page#]`
-                    this.example = `${pre}orders`
-                    this.online = true
-                    this.admin = true
-                }
-                run() {
-                    if (!isadmin(message.author.id)) { message.channel.send('You dont have permission to run this command!'); return; }
-                    let orders = server.orders, page = 1
-                    if (orders == undefined) orders = []
-                    if (!isNaN(args[0]) || args[0] == undefined) page = 0;
-                    else page = args[0] - 1;
-                    for (let i = page * 21; i < 21 + (page * 21) && i < orders.length; i++) {
-                        let order = orders[i];
-                        embed.addField(`${i + 1}. ${order.user}`, `${order.amount} ${order.item}(s)`, true);
-                    }
-                    embed.setTitle(`${message.guild.name}'s Orders`)
-                    embed.setFooter(`Page ${page}/${Math.ceil(orders.length / 21)}`)
-                    message.channel.send(embed).then(msg => {
-                        if (server.deletemessages) {
-                            msg.delete(30000)
-                            message.delete(5000)
-                        }
-                    })
-                }
-            },
-
-            class clearorder {
-                constructor() {
-                    this.name = ['clearorder']
-                    this.desc = `Clears an order from the orders list.`
-                    this.use = `${pre}orders [order#]`
-                    this.example = `${pre}orders`
-                    this.online = true
-                    this.admin = true
-                }
-                run() {
-                    if (!isadmin(message.author.id)) { message.channel.send('You dont have permission to run this command!'); return; }
-                    let orders = server.orders, order;
-                    if (orders == undefined) orders = []
-                    if (isNaN(args[0]) || args[0] == undefined) { message.channel.send('You need to specify an order to clear!'); return; }
-                    else order = args[0];
-
-                    if (orders[order-1] == undefined) { message.channel.send('Invalid Order!'); return; }
-                    
-                    message.channel.send(`Cleared order ${order}, ${orders[order - 1].user}: ${orders[order - 1].amount} ${orders[order - 1].item}(s)`);
-                    orders.splice(order-1, 1);
-                    r.table('Servers').get(message.guild.id).update({orders: orders}).run(connection);
+                    if (!x) {message.channel.send('I could not find an item with this name; did you spell it correctly?'); return;}
                 }
             },
             //-------------------------------------------------------------------------------------------\\
@@ -3144,7 +3288,12 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                                 })
                             }
                         } else {
-                            message.channel.send('Please put a rule to add!')
+                            message.channel.send('Please put a rule to add!').then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         }
                     } else {
                         message.channel.send('Nice try, but you are not an admin!').then(msg => {
@@ -3171,28 +3320,8 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                         let rule = args.join(' ')
                         if (rule.length != 0) {
                             let rules = server.rules
-                            if (!isNaN(rule)) {
-                                if (rule - 1 > rules.length || rule < 1) {
-                                    message.channel.send('Invalid rule #!').then(msg => {
-                                        if (server.deletemessages) {
-                                            msg.delete(server.messagetimeout)
-                                            message.delete(5000)
-                                        }
-                                    })
-                                } else {
-                                    rules.splice(rule - 1, 1)
-                                    message.channel.send(`Removed rule ${rule}`).then(msg => {
-                                        if (server.deletemessages) {
-                                            msg.delete(server.messagetimeout)
-                                            message.delete(5000)
-                                        }
-                                    })
-                                    r.table('Servers').get(message.guild.id).update({ rules: rules }).run(connection)
-                                    return;
-                                }
-                            }
                             for (let i = 0; i < rules.length; i++) {
-                                if (rules[i].toLowerCase() == rule.toLowerCase()) {
+                                if (rules[i].toLowerCase().startsWith(rule.toLowerCase())) {
                                     found = true
                                     message.channel.send(`Removed **${rules[i]}** from the rule list.`).then(msg => {
                                         if (server.deletemessages) {
@@ -3214,7 +3343,12 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                                 })
                             }
                         } else {
-                            message.channel.send('Please put a rule to remove!')
+                            message.channel.send('Please put a rule to remove!').then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         }
                     }
                 }
@@ -3285,7 +3419,12 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                                 message.delete(0)
                             })
                         } else {
-                            message.channel.send('I cant send an empty message!')
+                            message.channel.send('I cant send an empty message!').then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         }
                     } else {
                         message.channel.send(`Nice try, but this command is in admin only mode and you're not an admin!`).then(msg => {
@@ -3359,12 +3498,22 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                         })
                     } else {
                         if (isadmin(message.mentions.users.first().id)) {
-                            message.channel.send('I can not warn this user!')
+                            message.channel.send('I can not warn this user!').then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         } else {
                             args.shift()
                             let reason = args.join(' ')
                             message.mentions.users.first().send(`You were warned on ${message.guild.name} for ${reason}.`)
-                            message.channel.send(`Warned ${message.mentions.users.first().username} for ${reason}`)
+                            message.channel.send(`Warned ${message.mentions.users.first().username} for ${reason}`).then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                             r.table('Punishments').count().run(connection, function (err, count) {
                                 r.table('Punishments').insert({ id: count, user: { name: message.mentions.users.first().username, id: message.mentions.users.first().id }, reason: reason, type: 'Warn' }).run(connection)
                                 let serverwarnings = server.warnings
@@ -3511,10 +3660,20 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                         }
                         if (isowner) {
                             message.channel.send(isadmin(server, message.author.id))
-                            message.channel.send('Something happened!')
+                            message.channel.send('Something happened!').then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
 
                         } else {
-                            message.channel.send('Nice try, but you are not a bot owner!')
+                            message.channel.send('Nice try, but you are not a bot owner!').then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         }
                     } catch (err) {
                         message.channel.send(`ERROR ${clean(err)}`)
@@ -3524,7 +3683,7 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
             class history {
                 constructor() {
                     this.name = ['history']
-                    this.desc = `**ADMIN COMMAND** Shows recent punishments.`
+                    this.desc = `**ADMIN COMMAND** Shows recent punishments..`
                     this.use = `${pre}history (@user)`
                     this.example = `${pre}history \n ${pre}history @TheDeafCreeper`
                     this.online = true
@@ -3538,13 +3697,13 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                         } else {
                             var page = args[1]
                         }
-                        for (let i = 12 * (page - 1); i < serverpunish.length && embed.fields.length < 12; i++) {
+                        for (let i = 12 * (page - 1); i < serverpunish.length && i < 12 * page; i++) {
                             r.table('Punishments').get(serverpunish[i].id).run(connection, function (err, case0) {
                                 if (case0.user.id == message.mentions.users.first().id) {
                                     embed.addField(`Case id: ${case0.id} | User: ${case0.user.name}`, `Type: ${case0.type} | Reason: ${case0.reason}`)
                                 }
                                 if (i == serverpunish.length - 1 || i == (12 * page) - 1) {
-                                    embed.setFooter(`Page ${page}/${Math.ceil(((embed.fields.length) / 12))}`)
+                                    embed.setFooter(`Page ${page}/${Math.ceil(((serverpunish.length) / 12))}`)
                                     message.channel.send(embed).then(msg => {
                                         if (server.deletemessages) {
                                             msg.delete(server.messagetimeout)
@@ -3604,10 +3763,20 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                         let location = autoroles.indexOf(role)
                         if (location != -1) {
                             autoroles.splice(location, 1)
-                            message.channel.send(`Removed ${message.mentions.roles.first().name} as an auto role.`)
+                            message.channel.send(`Removed ${message.mentions.roles.first().name} as an auto role.`).then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                             r.table('Servers').get(message.guild.id).update({ autoroles: autoroles }).run(connection)
                         } else {
-                            message.channel.send('That is not a valid role!')
+                            message.channel.send('That is not a valid role!').then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         }
                     } else {
                         message.channel.send(`Invalid choice! Do ${pre} add @role or ${pre} remove @role`).then(msg => {
@@ -3754,10 +3923,20 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                         let channel = message.mentions.channels.first()
                         let rchannel = server.reportchannel
                         if (channel != undefined) {
-                            message.channel.send(`Set the reports channel to ${channel.name}.`)
+                            message.channel.send(`Set the reports channel to ${channel.name}.`).then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                             r.table('Servers').get(message.guild.id).update({ reportchannel: channel.id }).run(connection)
                         } else {
-                            message.channel.send('Please define a channel!')
+                            message.channel.send('Please define a channel!').then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         }
                     } else {
                         message.channel.send('Nice try, but you are not an admin!').then(msg => {
@@ -3785,7 +3964,12 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                         if (args[1] == '') { args.splice(1, 1) }
                         let user = message.mentions.users.first()
                         if (user == undefined) {
-                            message.channel.send('Define a user!')
+                            message.channel.send('Define a user!').then(msg => {
+                                if (server.deletemessages) {
+                                    msg.delete(server.messagetimeout)
+                                    message.delete(5000)
+                                }
+                            })
                         } else {
                             if (isadmin(user.id)) {
                                 embed.addField(`ADMIN REPORT`, 'The reported user is an admin.')
@@ -3843,9 +4027,7 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
                             }
                         }
                         embed.setFooter('Once the report is reviewed this message can be deleted.')
-                        if (embed.title != undefined) {
-                            bot.channels.get(`${server.reportchannel}`).send(embed)
-                        }
+                        bot.channels.get(`${server.reportchannel}`).send(embed)
                     } else {
                         message.channel.send(`There is no report channel set so you can not use this command.`).then(msg => {
                             if (server.deletemessages) {
@@ -3915,10 +4097,69 @@ exports.run = (bot, message, args, r, connection, cmd, pre) => {
         ]
         find(cmd, commands)
         function isadmin(user) {
-            if (message.guild.owner == user) return true
-            for (let i = 0; i < server.admins.length; i++)
-                if (server.admins[i] == user) return true;
+            if (message.guild.owner == user) {
+                return true
+            }
+            for (let i = 0; i < server.admins.length; i++) {
+                if (server.admins[i] == user) {
+                    return true;
+                }
+            }
             return false;
         }
     })
 }
+
+
+/*
+.then(msg => {
+    if (server.deletemessages) {
+        msg.delete(server.messagetimeout)
+        message.delete(5000)
+    }
+})
+
+r.table('Shop').orderBy('id').run(connection, function (err, shopraw) {
+    shopraw.toArray(function (err, shop) {
+       
+    })
+})
+
+
+if (args[0] == undefined) {
+    var page = 1
+} else {
+    var page = args[0]
+}
+for (let i = 12 * (page - 1); i < x.length && i < 12 * page; i++) {
+    
+}
+embed.setFooter(`Page ${page}/${Math.ceil(((x.length) / 12))}`)
+
+
+message.channel.send(embed).then(msg => {
+    if (server.deletemessages) {
+        msg.delete(30000)
+        message.delete(5000)
+    }
+})
+
+r.table('Servers').get(message.guild.id).update({ x: !server.x }).run(connection)
+message.channel.send(`message ${!server.x}`).then(msg => {
+    if (server.deletemessages) {
+        msg.delete(server.messagetimeout)
+        message.delete(5000)
+    }
+})
+
+
+args.shift()
+let reason = args.join(' ')
+r.table('Punishments').count().run(connection, function (err, count) {
+    r.table('Punishments').insert({ id: count, user: { name: message.mentions.users.first().username, id: message.mentions.users.first().id }, reason: reason, type: 'Warn' }).run(connection)
+    let serverwarnings = server.warnings
+    serverwarnings.push({ id: count, name: message.mentions.users.first().username })
+    r.table('Servers').get(message.guild.id).update({ warnings: serverwarnings }).run(connection)
+})
+
+*/
